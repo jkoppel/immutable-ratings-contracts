@@ -75,10 +75,13 @@ An ERC20 token representing negative ratings ("Thumbs Down"). Only the Immutable
 
 ## Getting Started
 
-### Prerequisites
+### Environment Variables
 
-- Node.js (v16+)
-- pnpm
+Create a .env file with the following
+
+```
+PRIVATE_KEY=<private key for deployment and testing>
+```
 
 ### Installation
 
