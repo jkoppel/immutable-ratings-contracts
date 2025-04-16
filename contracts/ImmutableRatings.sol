@@ -78,8 +78,7 @@ contract ImmutableRatings is Ownable, ReentrancyGuard {
      * @param _receiver The address of the fee receiver
      */
     constructor(address _tokenUp, address _tokenDown, address _receiver) Ownable(msg.sender) {
-        if (_tokenUp == address(0) || _tokenDown == address(0) || _receiver == address(0))
-            revert ZeroAddress();
+        if (_tokenUp == address(0) || _tokenDown == address(0) || _receiver == address(0)) revert ZeroAddress();
 
         tokenUp = TUP(_tokenUp);
         tokenDown = TDN(_tokenDown);
@@ -173,9 +172,7 @@ contract ImmutableRatings is Ownable, ReentrancyGuard {
     function createUpRating(MarketRating calldata rating) external payable nonReentrant notPaused {
         _validateRating(rating);
         _createUpRating(msg.sender, rating);
-
-        if (msg.value < _getRatingPrice(rating.amount)) revert InsufficientPayment();
-        _distributePayment(msg.value);
+        _processPayment(rating.amount);
     }
 
     /**
@@ -185,9 +182,7 @@ contract ImmutableRatings is Ownable, ReentrancyGuard {
     function createDownRating(MarketRating calldata rating) external payable nonReentrant notPaused {
         _validateRating(rating);
         _createDownRating(msg.sender, rating);
-
-        if (msg.value < _getRatingPrice(rating.amount)) revert InsufficientPayment();
-        _distributePayment(msg.value);
+        _processPayment(rating.amount);
     }
 
     /**
@@ -222,8 +217,7 @@ contract ImmutableRatings is Ownable, ReentrancyGuard {
             totalDown += rating.amount;
         }
 
-        if (msg.value < _getRatingPrice(totalUp + totalDown)) revert InsufficientPayment();
-        _distributePayment(msg.value);
+        _processPayment(totalUp + totalDown);
     }
 
     /**
@@ -253,8 +247,9 @@ contract ImmutableRatings is Ownable, ReentrancyGuard {
      * @param rating The rating to validate
      */
     function _validateRating(MarketRating calldata rating) internal pure {
-        if (rating.amount % 1 ether != 0 || rating.amount < MIN_RATING_AMOUNT)
+        if (rating.amount % 1 ether != 0 || rating.amount < MIN_RATING_AMOUNT) {
             revert InvalidRatingAmount();
+        }
     }
 
     /**
@@ -273,6 +268,27 @@ contract ImmutableRatings is Ownable, ReentrancyGuard {
      */
     function _getRatingPrice(uint256 amount) internal view returns (uint256) {
         return (amount * ratingPrice) / 1 ether;
+    }
+
+    /**
+     * @notice Processes the payment for a rating, including funds distribution and excess refund
+     * @param amount The amount of tokens to rate
+     */
+    function _processPayment(uint256 amount) internal {
+        uint256 price = _getRatingPrice(amount);
+        if (msg.value < price) revert InsufficientPayment();
+        _refundExcessPayment(msg.value - price);
+        _distributePayment(price);
+    }
+
+    /**
+     * @notice Refunds excess amount to the caller
+     * @param amount The amount of tokens to refund
+     */
+    function _refundExcessPayment(uint256 amount) internal {
+        if (amount > 0) {
+            payable(msg.sender).transfer(amount);
+        }
     }
 
     /**

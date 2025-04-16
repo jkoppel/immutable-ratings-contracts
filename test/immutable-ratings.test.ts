@@ -74,7 +74,6 @@ describe("Immutable Ratings", () => {
       expect(await tup.hasRole(await tup.MINTER_ROLE(), immutableRatings.target)).to.be.true;
     });
 
-
     it("should revert if the receiver is the zero address", async () => {
       await expect(
         immutableRatingsFactory.deploy(tup.target, tdn.target, ethers.ZeroAddress),
@@ -120,7 +119,6 @@ describe("Immutable Ratings", () => {
         "ContractPaused",
       );
     });
-
   });
 
   describe("Create Rating", () => {
@@ -151,15 +149,19 @@ describe("Immutable Ratings", () => {
       },
     ];
 
-    const value = [...upRatings, ...downRatings].reduce((acc, curr) => {
-      return acc + curr.amount;
-    }, 0n);
+    let value: bigint;
 
     beforeEach(async () => {
       marketOne = await immutableRatings.getMarketAddress("https://www.example-one.com");
       marketTwo = await immutableRatings.getMarketAddress("https://www.example-two.com");
       marketThree = await immutableRatings.getMarketAddress("https://www.example-three.com");
       marketFour = await immutableRatings.getMarketAddress("https://www.example-four.com");
+
+      const total = [...upRatings, ...downRatings].reduce((acc, curr) => {
+        return acc + curr.amount;
+      }, 0n);
+
+      value = await immutableRatings.previewPayment(total);
     });
 
     it("should create ratings", async () => {
@@ -221,7 +223,9 @@ describe("Immutable Ratings", () => {
     it("should skip if the market already exists", async () => {
       // This isn't easily testable, but can be visualised in test coverage
       await immutableRatings.createMarket("https://www.example-one.com");
-      await immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("1000") }], [], { value });
+      await immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("1000") }], [], {
+        value,
+      });
     });
 
     it("should revert if the contract is paused", async () => {
@@ -231,6 +235,13 @@ describe("Immutable Ratings", () => {
         "ContractPaused",
       );
     });
+
+    it("should refund excess payment", async () => {
+      await expect(immutableRatings.createRatings(upRatings, downRatings, { value: value + 1n })).to.changeEtherBalance(
+        deployer,
+        -value,
+      );
+    });
   });
 
   describe("TUP & TDN", () => {
@@ -238,7 +249,7 @@ describe("Immutable Ratings", () => {
       await tup.grantRole(await tup.MINTER_ROLE(), deployer.address);
       await tdn.grantRole(await tdn.MINTER_ROLE(), deployer.address);
     });
-    
+
     it("should mint tokens to an address", async () => {
       await tup.mint(deployer.address, deployer.address, parseEther("1000"));
       await tdn.mint(deployer.address, deployer.address, parseEther("1000"));
@@ -259,8 +270,12 @@ describe("Immutable Ratings", () => {
     });
 
     it("should revert if the caller does not have the minter role", async () => {
-      await expect(tup.connect(receiver).mint(deployer.address, deployer.address, parseEther("1000"))).to.be.revertedWithCustomError(tup, "AccessControlUnauthorizedAccount");
-      await expect(tdn.connect(receiver).mint(deployer.address, deployer.address, parseEther("1000"))).to.be.revertedWithCustomError(tdn, "AccessControlUnauthorizedAccount");
+      await expect(
+        tup.connect(receiver).mint(deployer.address, deployer.address, parseEther("1000")),
+      ).to.be.revertedWithCustomError(tup, "AccessControlUnauthorizedAccount");
+      await expect(
+        tdn.connect(receiver).mint(deployer.address, deployer.address, parseEther("1000")),
+      ).to.be.revertedWithCustomError(tdn, "AccessControlUnauthorizedAccount");
     });
   });
 
@@ -323,10 +338,16 @@ describe("Immutable Ratings", () => {
 
       it("should revert if the contract is paused", async () => {
         await immutableRatings.setIsPaused(true);
-        await expect(immutableRatings.createUpRating({ url, amount }, { value: payment })).to.be.revertedWithCustomError(
-          immutableRatings,
-          "ContractPaused",
-        );
+        await expect(
+          immutableRatings.createUpRating({ url, amount }, { value: payment }),
+        ).to.be.revertedWithCustomError(immutableRatings, "ContractPaused");
+      });
+
+      it("should refund excess payment", async () => {
+        // Checks that only the correct amount (0.00007) has been sent to the contract
+        await expect(
+          immutableRatings.createUpRating({ url, amount: parseEther("1000") }, { value: parseEther("0.00008") }),
+        ).to.changeEtherBalance(deployer, -parseEther("0.00007"));
       });
     });
 
@@ -370,10 +391,15 @@ describe("Immutable Ratings", () => {
 
       it("should revert if the contract is paused", async () => {
         await immutableRatings.setIsPaused(true);
-        await expect(immutableRatings.createDownRating({ url, amount }, { value: payment })).to.be.revertedWithCustomError(
-          immutableRatings,
-          "ContractPaused",
-        );
+        await expect(
+          immutableRatings.createDownRating({ url, amount }, { value: payment }),
+        ).to.be.revertedWithCustomError(immutableRatings, "ContractPaused");
+      });
+
+      it("should refund excess payment", async () => {
+        await expect(
+          immutableRatings.createDownRating({ url, amount: parseEther("1000") }, { value: parseEther("0.00008") }),
+        ).to.changeEtherBalance(deployer, -parseEther("0.00007"));
       });
     });
   });
@@ -395,7 +421,10 @@ describe("Immutable Ratings", () => {
   describe("Get User Ratings", () => {
     it("should get the user ratings", async () => {
       expect(await immutableRatings.getUserRatings(deployer.address)).to.equal(0);
-      await immutableRatings.createUpRating({ url: "https://www.example.com", amount: parseEther("1000") }, { value: parseEther("0.00007") });
+      await immutableRatings.createUpRating(
+        { url: "https://www.example.com", amount: parseEther("1000") },
+        { value: parseEther("0.00007") },
+      );
       expect(await immutableRatings.getUserRatings(deployer.address)).to.equal(parseEther("1000"));
     });
   });
