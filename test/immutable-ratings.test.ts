@@ -447,4 +447,14 @@ describe("Immutable Ratings", () => {
       );
     });
   });
+
+  describe("Transfer Ownership", () => {
+    it("should transfer ownership", async () => {
+      expect(await immutableRatings.owner()).to.equal(deployer.address);
+      await immutableRatings.transferOwnership(receiver.address);
+      expect(await immutableRatings.pendingOwner()).to.equal(receiver.address);
+      await immutableRatings.connect(receiver).acceptOwnership();
+      expect(await immutableRatings.owner()).to.equal(receiver.address);
+    });
+  });
 });

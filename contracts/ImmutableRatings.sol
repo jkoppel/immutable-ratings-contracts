@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {TUP} from "./TUP.sol";
 import {TDN} from "./TDN.sol";
 
@@ -13,7 +13,7 @@ import {TDN} from "./TDN.sol";
  * @author immutable-ratings
  * @notice Core controller contract for the Immutable Ratings platform
  */
-contract ImmutableRatings is Ownable, ReentrancyGuard {
+contract ImmutableRatings is Ownable2Step, ReentrancyGuard {
     /// @dev The TUP token. Represents upvotes.
     TUP public immutable tokenUp;
 
