@@ -121,128 +121,137 @@ describe("Immutable Ratings", () => {
     });
   });
 
-  describe("Create Rating", () => {
-    let marketOne: string;
-    let marketTwo: string;
-    let marketThree: string;
-    let marketFour: string;
+  // describe("Create Rating", () => {
+  //   let marketOne: string;
+  //   let marketTwo: string;
+  //   let marketThree: string;
+  //   let marketFour: string;
 
-    const upRatings: MarketRatingStruct[] = [
-      {
-        url: "https://www.example-one.com",
-        amount: parseEther("1000"),
-      },
-      {
-        url: "https://www.example-two.com",
-        amount: parseEther("2000"),
-      },
-    ];
+  //   const upRatings: MarketRatingStruct[] = [
+  //     {
+  //       url: "https://www.example-one.com",
+  //       amount: parseEther("1000"),
+  //     },
+  //     {
+  //       url: "https://www.example-two.com",
+  //       amount: parseEther("2000"),
+  //     },
+  //   ];
 
-    const downRatings: MarketRatingStruct[] = [
-      {
-        url: "https://www.example-three.com",
-        amount: parseEther("1000"),
-      },
-      {
-        url: "https://www.example-four.com",
-        amount: parseEther("2000"),
-      },
-    ];
+  //   const downRatings: MarketRatingStruct[] = [
+  //     {
+  //       url: "https://www.example-three.com",
+  //       amount: parseEther("1000"),
+  //     },
+  //     {
+  //       url: "https://www.example-four.com",
+  //       amount: parseEther("2000"),
+  //     },
+  //   ];
 
-    let value: bigint;
+  //   let value: bigint;
 
-    beforeEach(async () => {
-      marketOne = await immutableRatings.getMarketAddress("https://www.example-one.com");
-      marketTwo = await immutableRatings.getMarketAddress("https://www.example-two.com");
-      marketThree = await immutableRatings.getMarketAddress("https://www.example-three.com");
-      marketFour = await immutableRatings.getMarketAddress("https://www.example-four.com");
+  //   beforeEach(async () => {
+  //     marketOne = await immutableRatings.getMarketAddress("https://www.example-one.com");
+  //     marketTwo = await immutableRatings.getMarketAddress("https://www.example-two.com");
+  //     marketThree = await immutableRatings.getMarketAddress("https://www.example-three.com");
+  //     marketFour = await immutableRatings.getMarketAddress("https://www.example-four.com");
 
-      const total = [...upRatings, ...downRatings].reduce((acc, curr) => {
-        return acc + curr.amount;
-      }, 0n);
+  //     const total = [...upRatings, ...downRatings].reduce((acc, curr) => {
+  //       return acc + curr.amount;
+  //     }, 0n);
 
-      value = await immutableRatings.previewPayment(total);
-    });
+  //     value = await immutableRatings.previewPayment(total);
+  //   });
 
-    it("should create ratings", async () => {
-      await immutableRatings.createRatings(upRatings, downRatings, { value });
-    });
+  //   it("should create ratings", async () => {
+  //     await immutableRatings.createRatings(upRatings, downRatings, { value });
+  //   });
 
-    it("should mint tokens to market addresses", async () => {
-      expect(await tup.balanceOf(marketOne)).to.equal(0);
-      expect(await tup.balanceOf(marketTwo)).to.equal(0);
-      expect(await tdn.balanceOf(marketThree)).to.equal(0);
-      expect(await tdn.balanceOf(marketFour)).to.equal(0);
+  //   it("should mint tokens to market addresses", async () => {
+  //     expect(await tup.balanceOf(marketOne)).to.equal(0);
+  //     expect(await tup.balanceOf(marketTwo)).to.equal(0);
+  //     expect(await tdn.balanceOf(marketThree)).to.equal(0);
+  //     expect(await tdn.balanceOf(marketFour)).to.equal(0);
 
-      await immutableRatings.createRatings(upRatings, downRatings, { value });
+  //     await immutableRatings.createRatings(upRatings, downRatings, { value });
 
-      expect(await tup.balanceOf(marketOne)).to.equal(upRatings[0]?.amount);
-      expect(await tup.balanceOf(marketTwo)).to.equal(upRatings[1]?.amount);
-      expect(await tdn.balanceOf(marketThree)).to.equal(downRatings[0]?.amount);
-      expect(await tdn.balanceOf(marketFour)).to.equal(downRatings[1]?.amount);
-    });
+  //     expect(await tup.balanceOf(marketOne)).to.equal(upRatings[0]?.amount);
+  //     expect(await tup.balanceOf(marketTwo)).to.equal(upRatings[1]?.amount);
+  //     expect(await tdn.balanceOf(marketThree)).to.equal(downRatings[0]?.amount);
+  //     expect(await tdn.balanceOf(marketFour)).to.equal(downRatings[1]?.amount);
+  //   });
 
-    it("should distribute the payment to the receiver", async () => {
-      await expect(immutableRatings.createRatings(upRatings, downRatings, { value })).to.changeEtherBalance(
-        receiver,
-        value,
-      );
-    });
+  //   it("should distribute the payment to the receiver", async () => {
+  //     await expect(immutableRatings.createRatings(upRatings, downRatings, { value })).to.changeEtherBalance(
+  //       receiver,
+  //       value,
+  //     );
+  //   });
 
-    it("should emit RatingUpCreated event", async () => {
-      await expect(immutableRatings.createRatings(upRatings, downRatings, { value }))
-        .to.emit(immutableRatings, "RatingUpCreated")
-        .withArgs(deployer.address, marketOne, upRatings[0]?.amount);
-    });
+  //   it("should emit RatingUpCreated event", async () => {
+  //     await expect(immutableRatings.createRatings(upRatings, downRatings, { value }))
+  //       .to.emit(immutableRatings, "RatingUpCreated")
+  //       .withArgs(deployer.address, marketOne, upRatings[0]?.amount);
+  //   });
 
-    it("should emit RatingDownCreated event", async () => {
-      await expect(immutableRatings.createRatings(upRatings, downRatings, { value }))
-        .to.emit(immutableRatings, "RatingDownCreated")
-        .withArgs(deployer.address, marketThree, downRatings[0]?.amount);
-    });
+  //   it("should emit RatingDownCreated event", async () => {
+  //     await expect(immutableRatings.createRatings(upRatings, downRatings, { value }))
+  //       .to.emit(immutableRatings, "RatingDownCreated")
+  //       .withArgs(deployer.address, marketThree, downRatings[0]?.amount);
+  //   });
 
-    it("should revert if not enough ether is sent", async () => {
-      await expect(immutableRatings.createRatings(upRatings, downRatings, {})).to.be.revertedWithCustomError(
-        immutableRatings,
-        "InsufficientPayment",
-      );
-    });
+  //   it("should revert if not enough ether is sent", async () => {
+  //     await expect(immutableRatings.createRatings(upRatings, downRatings, {})).to.be.revertedWithCustomError(
+  //       immutableRatings,
+  //       "InsufficientPayment",
+  //     );
+  //   });
 
-    it("should revert if the amount is not a multiple of 1 ether", async () => {
-      await expect(
-        immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("1000.1") }], []),
-      ).to.be.revertedWithCustomError(immutableRatings, "InvalidRatingAmount");
-    });
+  //   it("should revert if the amount is not a multiple of 1 ether", async () => {
+  //     await expect(
+  //       immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("1000.1") }], []),
+  //     ).to.be.revertedWithCustomError(immutableRatings, "InvalidRatingAmount");
+  //   });
 
-    it("should revert if the amount is less than the minimum rating amount", async () => {
-      await expect(
-        immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("999") }], []),
-      ).to.be.revertedWithCustomError(immutableRatings, "InvalidRatingAmount");
-    });
+  //   it("should revert if the amount is less than the minimum rating amount", async () => {
+  //     await expect(
+  //       immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("999") }], []),
+  //     ).to.be.revertedWithCustomError(immutableRatings, "InvalidRatingAmount");
+  //   });
 
-    it("should skip if the market already exists", async () => {
-      // This isn't easily testable, but can be visualised in test coverage
-      await immutableRatings.createMarket("https://www.example-one.com");
-      await immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("1000") }], [], {
-        value,
-      });
-    });
+  //   it("should skip if the market already exists", async () => {
+  //     // This isn't easily testable, but can be visualised in test coverage
+  //     await immutableRatings.createMarket("https://www.example-one.com");
+  //     await immutableRatings.createRatings([{ url: "https://www.example-one.com", amount: parseEther("1000") }], [], {
+  //       value,
+  //     });
+  //   });
 
-    it("should revert if the contract is paused", async () => {
-      await immutableRatings.setIsPaused(true);
-      await expect(immutableRatings.createRatings(upRatings, downRatings, { value })).to.be.revertedWithCustomError(
-        immutableRatings,
-        "ContractPaused",
-      );
-    });
+  //   it("should revert if the contract is paused", async () => {
+  //     await immutableRatings.setIsPaused(true);
+  //     await expect(immutableRatings.createRatings(upRatings, downRatings, { value })).to.be.revertedWithCustomError(
+  //       immutableRatings,
+  //       "ContractPaused",
+  //     );
+  //   });
 
-    it("should refund excess payment", async () => {
-      await expect(immutableRatings.createRatings(upRatings, downRatings, { value: value + 1n })).to.changeEtherBalance(
-        deployer,
-        -value,
-      );
-    });
-  });
+  //   it("should refund excess payment", async () => {
+  //     await expect(immutableRatings.createRatings(upRatings, downRatings, { value: value + 1n })).to.changeEtherBalance(
+  //       deployer,
+  //       -value,
+  //     );
+  //   });
+
+  //   it("should revert if the number of ratings exceeds the maximum", async () => {
+  //     const upRatings = Array(101).fill({ url: "https://www.example-one.com", amount: parseEther("1000") });
+
+  //     await expect(immutableRatings.createRatings(upRatings, [], { value })).to.be.revertedWithCustomError(
+  //       immutableRatings,
+  //       "MaxRatingsExceeded",
+  //     );
+  //   });
+  // });
 
   describe("TUP & TDN", () => {
     beforeEach(async () => {

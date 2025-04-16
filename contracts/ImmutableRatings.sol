@@ -192,41 +192,6 @@ contract ImmutableRatings is Ownable2Step, ReentrancyGuard {
     }
 
     /**
-     * @notice Creates ratings for multiple markets
-     * @param upRatings Array of MarketRating structs for upvotes
-     * @param downRatings Array of MarketRating structs for downvotes
-     */
-    function createRatings(
-        MarketRating[] calldata upRatings,
-        MarketRating[] calldata downRatings
-    ) external payable nonReentrant notPaused {
-        uint256 totalUp = 0;
-        uint256 totalDown = 0;
-
-        // Process UP votes
-        uint256 iUp = 0;
-        uint256 lengthUp = upRatings.length;
-        for (iUp; iUp < lengthUp; ++iUp) {
-            MarketRating calldata rating = upRatings[iUp];
-            _validateRating(rating);
-            _createUpRating(msg.sender, rating);
-            totalUp += rating.amount;
-        }
-
-        // Process DOWN votes
-        uint256 iDown = 0;
-        uint256 lengthDown = downRatings.length;
-        for (iDown; iDown < lengthDown; ++iDown) {
-            MarketRating calldata rating = downRatings[iDown];
-            _validateRating(rating);
-            _createDownRating(msg.sender, rating);
-            totalDown += rating.amount;
-        }
-
-        _processPayment(totalUp + totalDown);
-    }
-
-    /**
      * @dev Creates an UP rating. Does not validate the rating amount or user count.
      * @param rating The rating to create
      */

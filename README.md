@@ -1,15 +1,19 @@
 # Immutable Ratings Smart Contracts
 
-This repository contains the smart contracts for the Immutable Ratings platform, a decentralized rating system that allows users to submit positive (up) and negative (down) ratings for any URL on the web.
+This repository contains the smart contracts for the Immutable Ratings platform, a decentralized rating system that
+allows users to submit positive (up) and negative (down) ratings for any URL on the web.
 
 ## Overview
 
-Immutable Ratings is a blockchain-based rating system that creates immutable records of ratings for websites and online content. The system uses two ERC20 tokens to represent ratings:
+Immutable Ratings is a blockchain-based rating system that creates immutable records of ratings for websites and online
+content. The system uses two ERC20 tokens to represent ratings:
 
 - **Thumbs Up (TUP)**: Represents positive ratings
 - **Thumbs Down (TDN)**: Represents negative ratings
 
-Each URL has its own unique "market" address derived deterministically from the URL itself, ensuring consistency and preventing duplicates. When users rate a URL, tokens are minted to the corresponding market address, with the balance of tokens representing the cumulative rating score.
+Each URL has its own unique "market" address derived deterministically from the URL itself, ensuring consistency and
+preventing duplicates. When users rate a URL, tokens are minted to the corresponding market address, with the balance of
+tokens representing the cumulative rating score.
 
 ## Contract Architecture
 
@@ -34,8 +38,10 @@ An ERC20 token representing negative ratings ("Thumbs Down"). Only the Immutable
 
 ## Security Features
 
-- **Immutable Design**: The contracts are designed to be immutable and non-upgradeable. Future versions will be deployed separately.
-- **Reentrancy Protection**: The ImmutableRatings contract uses OpenZeppelin's ReentrancyGuard to prevent reentrancy attacks.
+- **Immutable Design**: The contracts are designed to be immutable and non-upgradeable. Future versions will be deployed
+  separately.
+- **Reentrancy Protection**: The ImmutableRatings contract uses OpenZeppelin's ReentrancyGuard to prevent reentrancy
+  attacks.
 - **Access Control**: Both token contracts use OpenZeppelin's AccessControl to restrict minting capabilities.
 - **Ownership**: The ImmutableRatings contract uses OpenZeppelin's Ownable for ownership management.
 
@@ -50,21 +56,25 @@ An ERC20 token representing negative ratings ("Thumbs Down"). Only the Immutable
 ### Functions
 
 #### Market Management
+
 - `createMarket(string calldata url)`: Creates a new market for a URL
 - `getMarketAddress(string calldata url)`: Returns the deterministic market address for a URL
 
 #### Rating Creation
+
 - `createUpRating(MarketRating calldata rating)`: Creates a positive rating for a URL
 - `createDownRating(MarketRating calldata rating)`: Creates a negative rating for a URL
-- `createRatings(MarketRating[] calldata upRatings, MarketRating[] calldata downRatings)`: Creates multiple ratings in a single transaction
 
 #### User Information
+
 - `getUserRatings(address user)`: Returns the total number of ratings submitted by a user
 
 #### Payment Management
+
 - `previewPayment(uint256 amount)`: Returns the payment required for a rating of the specified amount
 
 #### Admin Functions
+
 - `setReceiver(address _receiver)`: Sets the address that receives rating payments (owner only)
 
 ### TUP and TDN Tokens
@@ -86,17 +96,20 @@ PRIVATE_KEY=<private key for deployment and testing>
 ### Installation
 
 1. Clone the repository
+
    ```bash
    git clone <url>
    cd immutable-ratings-contracts
    ```
 
 2. Install dependencies
+
    ```bash
    pnpm install
    ```
 
 3. Compile the contracts
+
    ```bash
    pnpm run compile
    ```
@@ -109,6 +122,7 @@ PRIVATE_KEY=<private key for deployment and testing>
 ### Deployment
 
 The repository includes deployment scripts for:
+
 1. TUP token (`deploy/001-tup.ts`)
 2. TDN token (`deploy/002-tdn.ts`)
 3. ImmutableRatings contract (`deploy/003-immutable-ratings.ts`)
@@ -123,15 +137,20 @@ pnpm run deploy:contracts
 
 ### Security Considerations
 
-1. **Deterministic Market Addresses**: Market addresses are deterministically generated from URLs using a constant seed. This ensures consistency but also means market addresses are predictable.
+1. **Deterministic Market Addresses**: Market addresses are deterministically generated from URLs using a constant seed.
+   This ensures consistency but also means market addresses are predictable.
 
-2. **Token Minting**: Both TUP and TDN tokens are minted when ratings are created. There is no cap on the total supply of these tokens.
+2. **Token Minting**: Both TUP and TDN tokens are minted when ratings are created. There is no cap on the total supply
+   of these tokens.
 
-3. **Payment Handling**: Users must pay a fee (in ETH) to submit ratings. This fee is transferred to a designated receiver address.
+3. **Payment Handling**: Users must pay a fee (in ETH) to submit ratings. This fee is transferred to a designated
+   receiver address.
 
-4. **URL Validation**: The contract does not validate or normalize URLs. It's assumed that the frontend application handles URL normalization to prevent duplicate markets for the same content with different URL formats.
+4. **URL Validation**: The contract does not validate or normalize URLs. It's assumed that the frontend application
+   handles URL normalization to prevent duplicate markets for the same content with different URL formats.
 
-5. **Rating Amounts**: Ratings must be in multiples of 1 ether (10^18) and must meet the minimum rating amount requirement.
+5. **Rating Amounts**: Ratings must be in multiples of 1 ether (10^18) and must meet the minimum rating amount
+   requirement.
 
 ### Key Contract Invariants
 
@@ -144,6 +163,7 @@ pnpm run deploy:contracts
 ### Testing
 
 The repository includes a comprehensive test suite in `test/immutable-ratings.test.ts` that covers:
+
 - Contract deployment
 - Market creation
 - Rating submission
@@ -151,6 +171,7 @@ The repository includes a comprehensive test suite in `test/immutable-ratings.te
 - Error handling
 
 Run the tests with:
+
 ```bash
 pnpm run test
 ```
