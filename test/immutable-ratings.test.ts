@@ -468,6 +468,12 @@ describe("Immutable Ratings", () => {
         "OwnableUnauthorizedAccount",
       );
     });
+
+    it("should emit ReceiverUpdated event", async () => {
+      await expect(immutableRatings.setReceiver(receiver.address))
+        .to.emit(immutableRatings, "ReceiverUpdated")
+        .withArgs(receiver.address);
+    });
   });
 
   describe("Get User Ratings", () => {
@@ -497,6 +503,11 @@ describe("Immutable Ratings", () => {
         immutableRatings,
         "OwnableUnauthorizedAccount",
       );
+    });
+
+    it("should emit Paused event", async () => {
+      await expect(immutableRatings.setIsPaused(true)).to.emit(immutableRatings, "Paused").withArgs(true);
+      await expect(immutableRatings.setIsPaused(false)).to.emit(immutableRatings, "Paused").withArgs(false);
     });
   });
 

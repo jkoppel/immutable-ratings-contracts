@@ -57,6 +57,8 @@ contract ImmutableRatings is Ownable2Step, ReentrancyGuard {
     event MarketCreated(address indexed marketAddress, string url);
     event RatingUpCreated(address indexed user, address indexed market, uint256 amount);
     event RatingDownCreated(address indexed user, address indexed market, uint256 amount);
+    event ReceiverUpdated(address indexed newReceiver);
+    event Paused(bool isPaused);
 
     // Errors
     error ZeroAddress();
@@ -102,6 +104,7 @@ contract ImmutableRatings is Ownable2Step, ReentrancyGuard {
      */
     function setReceiver(address _receiver) external onlyOwner {
         receiver = _receiver;
+        emit ReceiverUpdated(_receiver);
     }
 
     /**
@@ -110,6 +113,7 @@ contract ImmutableRatings is Ownable2Step, ReentrancyGuard {
      */
     function setIsPaused(bool _isPaused) external onlyOwner {
         isPaused = _isPaused;
+        emit Paused(_isPaused);
     }
 
     /**
