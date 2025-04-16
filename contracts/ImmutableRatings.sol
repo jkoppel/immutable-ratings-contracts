@@ -14,6 +14,8 @@ import {TDN} from "./TDN.sol";
  * @notice Core controller contract for the Immutable Ratings platform
  */
 contract ImmutableRatings is Ownable2Step, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     /// @dev The TUP token. Represents upvotes.
     TUP public immutable tokenUp;
 
@@ -297,5 +299,15 @@ contract ImmutableRatings is Ownable2Step, ReentrancyGuard {
      */
     function _distributePayment(uint256 amount) internal {
         payable(receiver).transfer(amount);
+    }
+
+    /**
+     * @notice Recovers ERC20 tokens from the contract
+     * @param tokenAddress The address of the token to recover
+     * @param recipient The address of the recipient
+     */
+    function recoverERC20(address tokenAddress, address recipient) external onlyOwner {
+        if (tokenAddress == address(0) || recipient == address(0)) revert ZeroAddress();
+        IERC20(tokenAddress).safeTransfer(recipient, IERC20(tokenAddress).balanceOf(address(this)));
     }
 }

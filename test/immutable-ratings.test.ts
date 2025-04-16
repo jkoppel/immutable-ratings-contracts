@@ -277,6 +277,58 @@ describe("Immutable Ratings", () => {
         tdn.connect(receiver).mint(deployer.address, deployer.address, parseEther("1000")),
       ).to.be.revertedWithCustomError(tdn, "AccessControlUnauthorizedAccount");
     });
+
+    describe("Recover ERC20", () => {
+      it("should recover ERC20 tokens", async () => {
+        await tup.mint(deployer.address, tup.target, parseEther("1000"));
+        await tdn.mint(deployer.address, tdn.target, parseEther("1000"));
+
+        expect(await tup.balanceOf(tup.target)).to.equal(parseEther("1000"));
+        expect(await tdn.balanceOf(tdn.target)).to.equal(parseEther("1000"));
+
+        await tup.recoverERC20(tup.target, deployer.address);
+        await tdn.recoverERC20(tdn.target, deployer.address);
+
+        expect(await tup.balanceOf(tup.target)).to.equal(0);
+        expect(await tdn.balanceOf(tdn.target)).to.equal(0);
+
+        expect(await tup.balanceOf(deployer.address)).to.equal(parseEther("1000"));
+        expect(await tdn.balanceOf(deployer.address)).to.equal(parseEther("1000"));
+      });
+
+      it("should revert if the token address is the zero address", async () => {
+        await expect(tup.recoverERC20(ethers.ZeroAddress, deployer.address)).to.be.revertedWithCustomError(
+          tup,
+          "ZeroAddress",
+        );
+        await expect(tdn.recoverERC20(ethers.ZeroAddress, deployer.address)).to.be.revertedWithCustomError(
+          tdn,
+          "ZeroAddress",
+        );
+      });
+
+      it("should revert if the recipient is the zero address", async () => {
+        await expect(tup.recoverERC20(tup.target, ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          tup,
+          "ZeroAddress",
+        );
+        await expect(tdn.recoverERC20(tdn.target, ethers.ZeroAddress)).to.be.revertedWithCustomError(
+          tdn,
+          "ZeroAddress",
+        );
+      });
+
+      it("should revert if not the owner", async () => {
+        await expect(tup.connect(receiver).recoverERC20(tup.target, deployer.address)).to.be.revertedWithCustomError(
+          tup,
+          "AccessControlUnauthorizedAccount",
+        );
+        await expect(tdn.connect(receiver).recoverERC20(tdn.target, deployer.address)).to.be.revertedWithCustomError(
+          tdn,
+          "AccessControlUnauthorizedAccount",
+        );
+      });
+    });
   });
 
   describe("Preview Payment", () => {
@@ -455,6 +507,41 @@ describe("Immutable Ratings", () => {
       expect(await immutableRatings.pendingOwner()).to.equal(receiver.address);
       await immutableRatings.connect(receiver).acceptOwnership();
       expect(await immutableRatings.owner()).to.equal(receiver.address);
+    });
+  });
+
+  describe("Recover ERC20", () => {
+    it("should recover ERC20 tokens", async () => {
+      await tup.grantRole(await tup.MINTER_ROLE(), deployer.address);
+
+      await tup.mint(deployer.address, immutableRatings.target, parseEther("1000"));
+
+      expect(await tup.balanceOf(immutableRatings.target)).to.equal(parseEther("1000"));
+
+      await immutableRatings.recoverERC20(tup.target, deployer.address);
+
+      expect(await tup.balanceOf(deployer.address)).to.equal(parseEther("1000"));
+      expect(await tup.balanceOf(immutableRatings.target)).to.equal(0);
+    });
+
+    it("should revert if the token address is the zero address", async () => {
+      await expect(immutableRatings.recoverERC20(ethers.ZeroAddress, deployer.address)).to.be.revertedWithCustomError(
+        immutableRatings,
+        "ZeroAddress",
+      );
+    });
+
+    it("should revert if the recipient is the zero address", async () => {
+      await expect(immutableRatings.recoverERC20(tup.target, ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        immutableRatings,
+        "ZeroAddress",
+      );
+    });
+
+    it("should revert if not the owner", async () => {
+      await expect(
+        immutableRatings.connect(receiver).recoverERC20(tup.target, deployer.address),
+      ).to.be.revertedWithCustomError(immutableRatings, "OwnableUnauthorizedAccount");
     });
   });
 });

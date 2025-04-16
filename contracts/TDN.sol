@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.22;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
@@ -9,7 +10,11 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
  * @author immutable-ratings
  */
 contract TDN is ERC20, AccessControl {
+    using SafeERC20 for IERC20;
+
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    error ZeroAddress();
 
     /// @dev The number of downvotes that a user has created
     mapping(address user => uint256 downvotes) public downvotes;
@@ -28,5 +33,15 @@ contract TDN is ERC20, AccessControl {
     function mint(address minter, address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
         downvotes[minter] += amount;
+    }
+
+    /**
+     * @notice Recovers ERC20 tokens from the contract
+     * @param tokenAddress The address of the token to recover
+     * @param recipient The address of the recipient
+     */
+    function recoverERC20(address tokenAddress, address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (tokenAddress == address(0) || recipient == address(0)) revert ZeroAddress();
+        IERC20(tokenAddress).safeTransfer(recipient, IERC20(tokenAddress).balanceOf(address(this)));
     }
 }
