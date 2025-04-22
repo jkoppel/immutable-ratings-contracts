@@ -7,9 +7,9 @@ export interface ImmutableRatingsContracts {
 export const deployments: Record<number, ImmutableRatingsContracts> = {
   // Base Mainnet
   [8453]: {
-    TUP: "",
-    TDN: "",
-    ImmutableRatings: "",
+    TUP: "0xE6D3d08a6519F1346344bba0F25A6fE7aB50F06C",
+    TDN: "0x4461a66A7B5eCdBBE0bbBf09b41816f94c4834b2",
+    ImmutableRatings: "0xE07f02ff153d2e4F20cEbcEe7C3478243Bab442f",
   },
   // Base Sepolia
   [84532]: {
@@ -26,7 +26,7 @@ export const deployConfig = {
   },
   // Base Mainnet
   8453: {
-    receiver: "",
+    receiver: "0xc1Ec5b421905290F477C741ADf97c062921AA18A", // https://app.splits.org/accounts/0xc1Ec5b421905290F477C741ADf97c062921AA18A/?chainId=8453
   },
 };
 

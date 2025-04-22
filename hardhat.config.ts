@@ -28,6 +28,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      base: "P6Y7IMJGJK43EMAQPZK1158NFM15KYUXXS",
       baseSepolia: "P6Y7IMJGJK43EMAQPZK1158NFM15KYUXXS",
       arbitrumOne: vars.get("ARBISCAN_API_KEY", ""),
       avalanche: vars.get("SNOWTRACE_API_KEY", ""),
@@ -45,8 +46,8 @@ const config: HardhatUserConfig = {
     coinmarketcap: process.env.COINMARKETCAP_API_KEY || "",
     // L1: "ethereum",
     L2: "base",
-    // L1Etherscan: "TSUMBVQKM4V7IYIV1JW4RRETR4QIMNRWZK",
-    L2Etherscan: "P6Y7IMJGJK43EMAQPZK1158NFM15KYUXXS",
+    L1Etherscan: "TSUMBVQKM4V7IYIV1JW4RRETR4QIMNRWZK",
+    // L2Etherscan: "P6Y7IMJGJK43EMAQPZK1158NFM15KYUXXS",
   },
   networks: {
     hardhat: {
