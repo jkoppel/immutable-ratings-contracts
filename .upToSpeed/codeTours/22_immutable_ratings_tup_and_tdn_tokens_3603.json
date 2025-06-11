@@ -1,0 +1,117 @@
+{
+  "title": "2.2: Immutable Ratings: TUP & TDN Tokens",
+  "id": "rOaUlRfTmg6cdg10dnMycKm77s2M6QsrIqluk4/pjb8=",
+  "originalId": 3603,
+  "position": 3,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "Let's walk through `TUP.sol` to see how it implements role-based minting and upvote tracking.",
+      "title": "",
+      "id": "42464"
+    },
+    {
+      "type": "highlight",
+      "description": "These imports (lines 4–7) bring in OpenZeppelin’s `ERC20` standard, `safe ERC20` utilities, and `AccessControl` for role-based permissions.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 4,
+          "end": 7
+        }
+      ],
+      "title": "",
+      "id": "42465"
+    },
+    {
+      "type": "highlight",
+      "description": "The `TUP` contract inherits from OpenZeppelin's `ERC20` and `AccessControl` contracts. The `AccessControl` inheritance allows us to define a special role on line 14. This role is the key to controlling which addresses are allowed to mint new tokens.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 12,
+          "end": 15
+        }
+      ],
+      "title": "",
+      "id": "42466"
+    },
+    {
+      "type": "highlight",
+      "description": "The `upvotes` mapping (line 19) records each address’s cumulative upvote count, separate from its token balance.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 18,
+          "end": 20
+        }
+      ],
+      "title": "",
+      "id": "42467"
+    },
+    {
+      "type": "highlight",
+      "description": "In the constructor (`lines 21–24`), `TUP` names itself `\"Thumbs Up\"`, grants `DEFAULT_ADMIN_ROLE` to the deployer, and makes `DEFAULT_ADMIN_ROLE` the admin of `MINTER_ROLE`. Initially no one holds `MINTER_ROLE`.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 21,
+          "end": 24
+        }
+      ],
+      "title": "",
+      "id": "42468"
+    },
+    {
+      "type": "highlight",
+      "description": "The `onlyRole` modifier restricts this function to callers with the `MINTER_ROLE`. The function first performs the standard ERC20 minting action, then updates the `upvotes` mapping. This mapping creates a permanent record of how many upvotes a user has cast, which is kept separate from their current token balance.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 32,
+          "end": 35
+        }
+      ],
+      "title": "",
+      "id": "42469"
+    },
+    {
+      "type": "textOnly",
+      "description": "`TDN.sol` follows the same pattern but tracks downvotes instead of upvotes.",
+      "title": "",
+      "id": "42470"
+    },
+    {
+      "type": "highlight",
+      "description": "TDN declares a `downvotes` mapping (line 20) to accumulate each address’s downvotes.",
+      "file": "contracts/TDN.sol",
+      "highlight": [
+        {
+          "start": 19,
+          "end": 20
+        }
+      ],
+      "title": "",
+      "id": "42471"
+    },
+    {
+      "type": "highlight",
+      "description": "Its `mint` (lines 33\u0012336) mirrors **TUP**: only **MINTER_ROLE** may call it, it mints tokens to `to`, then adds `amount` to `downvotes[minter]`.",
+      "file": "contracts/TDN.sol",
+      "highlight": [
+        {
+          "start": 33,
+          "end": 36
+        }
+      ],
+      "title": "",
+      "id": "42472"
+    },
+    {
+      "type": "textOnly",
+      "description": "You’ve seen how both `contracts` enforce access control on `minting` and maintain separate vote tallies via `mappings`.",
+      "title": "",
+      "id": "42473"
+    }
+  ]
+}

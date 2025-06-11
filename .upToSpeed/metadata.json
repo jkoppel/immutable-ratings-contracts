@@ -1,0 +1,21 @@
+{
+  "packageName": "immutable-ratings",
+  "packageVersion": 1,
+  "hash": "0d078fb847367a15e9909630bdf632bbae666732",
+  "numberOfTours": 4,
+  "titleOfTours": [
+    "1.1: Immutable Ratings: High-Level Overview",
+    "2.1: Immutable Ratings: Overview",
+    "2.2: Immutable Ratings: TUP & TDN Tokens",
+    "2.3: Immutable Ratings: The Controller"
+  ],
+  "totalNumberOfSteps": 48,
+  "filesCovered": [
+    "README.md",
+    "contracts/TUP.sol",
+    "contracts/TDN.sol",
+    "contracts/ImmutableRatings.sol",
+    "test/immutable-ratings.test.ts"
+  ],
+  "numberOfFilesCovered": 5
+}

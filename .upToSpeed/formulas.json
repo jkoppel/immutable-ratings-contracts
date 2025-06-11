@@ -1,0 +1,1 @@
+[{"file":"contracts/ImmutableRatings.sol","formulas":[{"formula":"\\mathsf{upvotes}(T\\text{\\textunderscore}{\\text{up}}, user) + \\mathsf{downvotes}(T\\text{\\textunderscore}{\\text{down}}, user)","lineRange":{"end":98,"start":98}},{"formula":"\\frac{a \\cdot P\\text{\\textunderscore}{\\text{rating}}}{1.0}","lineRange":{"end":241,"start":241}}]}]

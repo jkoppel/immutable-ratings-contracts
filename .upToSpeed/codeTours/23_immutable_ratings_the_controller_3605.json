@@ -1,0 +1,163 @@
+{
+  "title": "2.3: Immutable Ratings: The Controller",
+  "id": "7l1cjCpWDk/FerowckAu/1k/hZUTCnMC5vkwVCF8po0=",
+  "originalId": 3605,
+  "position": 4,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This walkthrough covers the `ImmutableRatings.sol` controller contract. We’ll explore its state variables, deterministic market address creation, the rating submission flow, payment handling, administrative controls, and security considerations.",
+      "title": "",
+      "id": "42474"
+    },
+    {
+      "type": "highlight",
+      "description": "The contract holds two immutable token references:\n\n- `tokenUp` (`TUP`) for upvotes\n- `tokenDown` (`TDN`) for downvotes\n\nThese are set once in the constructor and cannot change.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 19,
+          "end": 23
+        }
+      ],
+      "title": "",
+      "id": "42475"
+    },
+    {
+      "type": "highlight",
+      "description": "Key constants govern pricing and market derivation:\n\n- `SEED` (line 30) provides a fixed seed for address generation.\n- `MIN_RATING_AMOUNT` (line 33) enforces a 1,000-token minimum.\n- `ratingPrice` (line 36) sets the ETH cost per 1 TUP/TDN unit.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 29,
+          "end": 37
+        }
+      ],
+      "title": "",
+      "id": "42476"
+    },
+    {
+      "type": "highlight",
+      "description": "Administrable state variables:\n\n- `receiver` (line 39) receives ETH fees.\n- `isPaused` (line 42) gates core actions when true.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 38,
+          "end": 43
+        }
+      ],
+      "title": "",
+      "id": "42477"
+    },
+    {
+      "type": "highlight",
+      "description": "`_createMarketAddress` deterministically generates a market address:\n\nIt hashes `SEED` + `url` (line 171) and casts to `address(uint160(...))`, ensuring the same URL always yields the same address.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 168,
+          "end": 172
+        }
+      ],
+      "title": "",
+      "id": "42478"
+    },
+    {
+      "type": "highlight",
+      "description": "`createUpRating` orchestrates upvote creation:\n\n- Guards: `nonReentrant` (reentrancy protection) and `notPaused`.\n- Calls `_validateRating`, `_createUpRating`, and `_processPayment` in sequence.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 178,
+          "end": 182
+        }
+      ],
+      "title": "",
+      "id": "42479"
+    },
+    {
+      "type": "highlight",
+      "description": "`_validateRating` enforces rating rules:\n\n1. No fractional tokens: `amount % 1 ether == 0`.\n2. Meets minimum: `amount >= MIN_RATING_AMOUNT`.\n\nInvalid inputs revert with `InvalidRatingAmount`.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 220,
+          "end": 224
+        }
+      ],
+      "title": "",
+      "id": "42480"
+    },
+    {
+      "type": "highlight",
+      "description": "`_getMarket` retrieves or registers a market:\n\n- Looks up `urlToMarket[url]`.\n- If unset, calls `_createMarket` to register and emit `MarketCreated`.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 155,
+          "end": 160
+        }
+      ],
+      "title": "",
+      "id": "42481"
+    },
+    {
+      "type": "highlight",
+      "description": "`_createUpRating` mints **TUP**:\n\n- `from` is the original minter.\n- `marketAddress` receives tokens.\n- Emits `RatingUpCreated`.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 198,
+          "end": 202
+        }
+      ],
+      "title": "",
+      "id": "42482"
+    },
+    {
+      "type": "highlight",
+      "description": "This internal function processes the ETH payment for a rating. It calculates the required `price`, validates the payment (`msg.value`), refunds any excess to the user, and distributes the fee to the designated receiver.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 248,
+          "end": 253
+        }
+      ],
+      "title": "",
+      "id": "42483"
+    },
+    {
+      "type": "highlight",
+      "description": "**Administrative functions** (`onlyOwner`):\n\n- `setReceiver` updates the fee recipient (lines 105–108).\n- `setIsPaused` toggles the paused state (lines 110–113).",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 105,
+          "end": 113
+        }
+      ],
+      "title": "",
+      "id": "42484"
+    },
+    {
+      "type": "highlight",
+      "description": "`recoverERC20` lets the owner withdraw any `ERC20` tokens accidentally sent here, using `safeTransfer` to move the entire balance to a recipient.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 278,
+          "end": 281
+        }
+      ],
+      "title": "",
+      "id": "42485"
+    },
+    {
+      "type": "textOnly",
+      "description": "With these components, users can submit upvotes or downvotes at a fixed `ETH` cost. URLs auto-generate markets, payments route securely to a receiver, and the owner retains control over pausing and fee configurations.",
+      "title": "",
+      "id": "42486"
+    }
+  ]
+}

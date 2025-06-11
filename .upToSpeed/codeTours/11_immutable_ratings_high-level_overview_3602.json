@@ -1,0 +1,165 @@
+{
+  "title": "1.1: Immutable Ratings: High-Level Overview",
+  "id": "KPj/4F66z61M1erH173Gu3EMf3RHDT7SG54wlezeqoI=",
+  "originalId": 3602,
+  "position": 1,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour introduces the core architecture and design of the `Immutable Ratings` codebase. It explains how the system uses two `ERC20` tokens to represent positive and negative ratings, how “virtual” markets are created deterministically, and how the `controller contract` ties everything together. It also previews the deeper tours on tokens, controller logic, deployment, and testing.",
+      "title": "",
+      "id": "42498"
+    },
+    {
+      "type": "highlight",
+      "description": "The `README.md` file provides a high-level overview of the project. It explains that **Immutable Ratings** is a decentralized system for rating any URL using two distinct ERC20 tokens: **Thumbs Up (TUP)** for positive ratings and **Thumbs Down (TDN)** for negative ones. This creates a binary reputation system directly on the blockchain.",
+      "file": "README.md",
+      "highlight": [
+        {
+          "start": 1,
+          "end": 14
+        }
+      ],
+      "title": "",
+      "id": "42499"
+    },
+    {
+      "type": "highlight",
+      "description": "The architecture consists of three main smart contracts working in concert. `TUP.sol` and `TDN.sol` are the ERC20 tokens for upvotes and downvotes, respectively. `ImmutableRatings.sol` is the central controller that orchestrates the rating process, manages payments, and holds the system's core logic.",
+      "file": "README.md",
+      "highlight": [
+        {
+          "start": 22,
+          "end": 38
+        }
+      ],
+      "title": "",
+      "id": "42500"
+    },
+    {
+      "type": "highlight",
+      "description": "Let's look at the `TUP` token contract. It inherits from `OpenZeppelin`'s `ERC20` for standard token functionality and `AccessControl` to manage permissions. The contract maintains a mapping called `upvotes` to track the total positive ratings each user has submitted.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 12,
+          "end": 19
+        }
+      ],
+      "title": "",
+      "id": "42501"
+    },
+    {
+      "type": "highlight",
+      "description": "This function's access control modifier is critical for security, ensuring only the main controller contract can create new tokens. The function's body serves a dual purpose: it first performs the minting operation and then updates an internal counter to credit the original rater for their contribution.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 32,
+          "end": 35
+        }
+      ],
+      "title": "",
+      "id": "42502"
+    },
+    {
+      "type": "highlight",
+      "description": "The `TDN` token contract is structurally identical to `TUP`. It serves the same purpose but for negative ratings, tracking `downvotes` instead of `upvotes`. This parallel structure keeps the logic clean and easy to understand.",
+      "file": "contracts/TDN.sol",
+      "highlight": [
+        {
+          "start": 19,
+          "end": 36
+        }
+      ],
+      "title": "",
+      "id": "42503"
+    },
+    {
+      "type": "highlight",
+      "description": "Now for the main controller, `ImmutableRatings.sol`. Its state variables are the backbone of the system.\n- `tokenUp` and `tokenDown`: Addresses of the `TUP` and `TDN` token contracts.\n- `SEED`: A unique string used to generate deterministic market addresses.\n- `MIN_RATING_AMOUNT`: The minimum number of tokens required for a valid rating.\n- `ratingPrice`: The cost in ETH to submit a rating.\n- `receiver`: The address where rating fees are sent.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 19,
+          "end": 36
+        }
+      ],
+      "title": "",
+      "id": "42504"
+    },
+    {
+      "type": "highlight",
+      "description": "Rating submissions are handled by two primary functions: `createUpRating` and `createDownRating`. Both are protected by `nonReentrant` and `notPaused` guards. They validate the rating amount, call the appropriate token contract to mint new rating tokens, and process the user's payment.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 178,
+          "end": 192
+        }
+      ],
+      "title": "",
+      "id": "42505"
+    },
+    {
+      "type": "highlight",
+      "description": "A key innovation is the concept of \"virtual\" markets. Instead of deploying a new contract for each URL, the system generates a unique, deterministic address for each market using `keccak256` hashing on the `SEED` and the URL. This address acts as the identifier for the rated entity, saving significant gas costs.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 168,
+          "end": 172
+        }
+      ],
+      "title": "",
+      "id": "42506"
+    },
+    {
+      "type": "highlight",
+      "description": "The payment flow is straightforward. `previewPayment` calculates the required ETH amount. The internal `_processPayment` function ensures the user has sent enough ETH, forwards the `ratingPrice` to the designated `receiver`, and refunds any excess to the sender. This prevents both overpayment and underpayment issues.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 231,
+          "end": 253
+        }
+      ],
+      "title": "",
+      "id": "42507"
+    },
+    {
+      "type": "highlight",
+      "description": "The contract includes several admin and security features built on `OpenZeppelin`'s best practices.\n- **Ownership and Access Control**: `onlyOwner` modifier and `Ownable2Step` for secure ownership transfer.\n- **Pausable**: `setIsPaused` allows the owner to halt core functions in an emergency.\n- **Fund Recovery**: `recoverERC20` provides a way to retrieve accidentally sent ERC20 tokens.\n- **Reentrancy Guard**: Protects key functions from reentrancy attacks.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 105,
+          "end": 281
+        }
+      ],
+      "title": "",
+      "id": "42508"
+    },
+    {
+      "type": "textOnly",
+      "description": "Deployment is managed through a series of sequential scripts using `hardhat-deploy`. The workflow is:\n1. `deploy/001-tup.ts`: Deploys the `TUP` token.\n2. `deploy/002-tdn.ts`: Deploys the `TDN` token.\n3. `deploy/003-immutable-ratings.ts`: Deploys the main `ImmutableRatings` controller.\nFinally, a configuration task grants the `MINTER_ROLE` for both tokens to the controller contract, allowing it to mint new rating tokens.",
+      "title": "",
+      "id": "42509"
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "test/immutable-ratings.test.ts"
+      ],
+      "description": "The test suite, located in `test/immutable-ratings.test.ts`, provides comprehensive coverage of the system's functionality. It includes tests for:\n- Successful deployment and configuration.\n- Correct market address creation.\n- Logic for submitting up-ratings and down-ratings.\n- Payment handling, including refunds.\n- Access control, pausing, and other security-related edge cases.\nThis ensures all the core invariants we've discussed are validated.",
+      "title": "",
+      "id": "42510"
+    },
+    {
+      "type": "textOnly",
+      "description": "This concludes the high-level tour of the Immutable Ratings codebase. You've seen the core token and controller contracts, the deterministic market creation mechanism, and the key security and deployment patterns.\n\nFor a more in-depth exploration, you can proceed to the following tours:\n- **Tour 2.1**: Tokens Overview (`TUP` & `TDN`)\n- **Tour 2.2**: Controller Logic (`ImmutableRatings.sol`)\n- **Tour 2.3**: Deployment & Configuration\n- **Tour 2.4**: Security Patterns & Testing",
+      "title": "",
+      "id": "42511"
+    }
+  ]
+}

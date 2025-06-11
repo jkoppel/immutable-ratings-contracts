@@ -1,0 +1,137 @@
+{
+  "title": "2.1: Immutable Ratings: Overview",
+  "id": "bE8uUkZIOpPQu2PMExxZ9JOj5fSnvVzHtivq7/SFmAA=",
+  "originalId": 3604,
+  "position": 2,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour provides a high-level overview of the Immutable Ratings component. The goal is to introduce the main contracts and their interactions without diving deep into implementation details.",
+      "title": "",
+      "id": "42487"
+    },
+    {
+      "type": "highlight",
+      "description": "The `TUP` contract defines the Thumbs Up token—an **ERC20** representing “upvotes”. It sets up a `MINTER_ROLE` for controlled minting and a `upvotes` mapping to track per-user mint counts.",
+      "file": "contracts/TUP.sol",
+      "highlight": [
+        {
+          "start": 12,
+          "end": 20
+        }
+      ],
+      "title": "",
+      "id": "42488"
+    },
+    {
+      "type": "highlight",
+      "description": "The `TDN` contract defines the Thumbs Down token—an **ERC20** representing “downvotes”. It mirrors `TUP` with a `MINTER_ROLE` and a `downvotes` mapping for user tracking.",
+      "file": "contracts/TDN.sol",
+      "highlight": [
+        {
+          "start": 12,
+          "end": 20
+        }
+      ],
+      "title": "",
+      "id": "42489"
+    },
+    {
+      "type": "highlight",
+      "description": "The `ImmutableRatings` contract is the core controller. It holds immutable references to `tokenUp` (`TUP`) and `tokenDown` (`TDN`), and manages rating creation.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 16,
+          "end": 24
+        }
+      ],
+      "title": "",
+      "id": "42490"
+    },
+    {
+      "type": "highlight",
+      "description": "`createUpRating` is the external entry point for users to submit an upvote. It validates the request, calls `_createUpRating`, and processes payment.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 178,
+          "end": 182
+        }
+      ],
+      "title": "",
+      "id": "42491"
+    },
+    {
+      "type": "highlight",
+      "description": "In `_createUpRating`, the contract fetches or creates a market address, then calls `tokenUp.mint(from, marketAddress, amount)` to mint the upvote tokens.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 198,
+          "end": 202
+        }
+      ],
+      "title": "",
+      "id": "42492"
+    },
+    {
+      "type": "highlight",
+      "description": "`createDownRating` mirrors the upvote flow for downvotes: it validates, calls `_createDownRating`, and handles payment.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 188,
+          "end": 192
+        }
+      ],
+      "title": "",
+      "id": "42493"
+    },
+    {
+      "type": "highlight",
+      "description": "In `_createDownRating`, the contract derives the market address and then calls `tokenDown.mint(from, marketAddress, amount)`.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 208,
+          "end": 212
+        }
+      ],
+      "title": "",
+      "id": "42494"
+    },
+    {
+      "type": "highlight",
+      "description": "`_createMarketAddress` generates a virtual market address by hashing a constant `SEED` with the `URL`. No contract is deployed\t6 addresses are deterministic.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 168,
+          "end": 172
+        }
+      ],
+      "title": "",
+      "id": "42495"
+    },
+    {
+      "type": "highlight",
+      "description": "`getUserRatings` returns a user's total activity by summing their upvotes and downvotes from the respective token contracts.",
+      "file": "contracts/ImmutableRatings.sol",
+      "highlight": [
+        {
+          "start": 97,
+          "end": 99
+        }
+      ],
+      "title": "",
+      "id": "42496"
+    },
+    {
+      "type": "textOnly",
+      "description": "This concludes the high-level overview of `Immutable Ratings`. You’ve seen the main contracts, the minting flow for up/down ratings, how markets are derived, and how user totals are computed.",
+      "title": "",
+      "id": "42497"
+    }
+  ]
+}
